@@ -14,6 +14,7 @@ void set_idt_entry_ (int n, uint32_t handler)
     idt[n].offset_high = (handler >> 16) & 0xFFFF;
 }
 
+
 void init_entry()
 {
     idt_ptr.limit = sizeof(idt) - 1;
