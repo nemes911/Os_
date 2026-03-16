@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build with libuv",
+      "type": "shell",
+      "command": "gcc",
+      "args": [
+        "kernelegg.c",
+        "-I./libuv/include",
+        "-L./libuv/build/Release",
+        "-luv",
+        "-o",
+        "kernelegg.exe"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

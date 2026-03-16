@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug with WinDbg",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "C:\\OS\\Project1\\Project1\\Project1.vcxproj",
+      "args": [],
+      "pipeTransport": {
+        "pipeProgram": "C:\\Program Files (x86)\\Windows Kits\\10\\Debuggers\\x64\\windbg.exe",
+        "pipeArgs": ["-k", "com:port=\\\\.\\COM1,resets=0"],
+        "debuggerPath": "windbg.exe"
+      }
+    }
+  ]
+}

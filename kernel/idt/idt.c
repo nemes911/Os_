@@ -28,7 +28,8 @@ void init_entry()
     set_idt_entry_(32, (uint32_t)irq0);
 
     set_idt_entry_(33, (uint32_t)irq1);
+}
 
-    
-
+void load_idt(){
+    __asm__ volatile("lidt %0" : : "m"(idt_ptr));
 }
