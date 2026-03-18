@@ -53,6 +53,7 @@ typedef struct inode{
     uint32_t indirect;
     uint16_t type;
     uint16_t flags;
+    uint32_t direct[12];
 } inode_t;
 
 #pragma pack(pop)
@@ -60,7 +61,6 @@ typedef struct inode{
 
 
 void fs_init();
-
 
 
 int inode_alloc();//+

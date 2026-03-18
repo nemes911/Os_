@@ -49,3 +49,6 @@ void block_free(uint32_t block){
     bitmap_clear(block);
 }
 
+void bitmap_flush(void) {
+    disk_write_sector(superblock.bitmap_start, block_bitmap);
+}

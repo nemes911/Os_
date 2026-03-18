@@ -29,6 +29,8 @@ typedef struct  Procces{
     ProccesState state;
     int time_run;
     int is_system;
+    int fds[8];
+    int open_count;
     int quantum;
     uint32_t esp;
     uint32_t eip;

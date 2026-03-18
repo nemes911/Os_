@@ -17,17 +17,22 @@ static int pcb_index = 0;
 
 
 void pcb_init(void){
-    current_pcb = pcb_create(0);
+    current_pcb = pcb_create(0, MAX_PRIORITY);
     current_pcb->state = PROC_RUNNING;
     current_pcb->quantum = DEFAULT_QUANTUM;
 }
 
-Procces* pcb_create(uint32_t pid){
+Procces* pcb_create(uint32_t pid, int priority){
     if(pcb_index >= 32) return NULL;
     Procces* p = &pcb_pool[pcb_index++];
     p->pid = pid;
-    p->quantum = DEFAULT_QUANTUM;
+    p->prioryty = priority;
+    p->quantum = DEFAULT_QUANTUM + (priority * 3);
     p->state = PROC_READY;
+    memset(p->fds, -1, sizeof(p->fds));
+    p->open_count =0;
+    p->esp = 0;
+    p->eip = 0;
     p->next = NULL;
     return p;
 }
@@ -104,32 +109,70 @@ Procces* kill_procces(Procces* init, int pid,tablepid* table, MemoryManager* mm)
     return NULL;
 }
 
-Procces* change_priority(Procces* init, int new_priority)
+int change_priority(Procces* proc, int new_priority)
 {
-    if(new_priority < init->prioryty)
-    {
-        return -1;
-    }
-    else
-    {
-        init->prioryty = new_priority;
-    }
-
-    return init;
+    if (new_priority < proc->prioryty) return -1;   // ошибка
+    proc->prioryty = new_priority;
+    proc->quantum  = DEFAULT_QUANTUM + (new_priority * 3);  // сразу пересчитываем квант
+    return 0;
 }
 
 
 void schedule(void){
+    if(!current_pcb) return;
+
     Procces* prev = current_pcb;
 
     if(current_pcb->state == PROC_RUNNING){
         current_pcb->state = PROC_READY;
-        enqueue(current_pcb, ready_queque);
+        current_pcb->next = NULL;
+
+        if(!ready_queque){
+            ready_queque = current_pcb;
+        } else {
+            Procces* tmp = ready_queque;
+            while(tmp->next) tmp = tmp->next;
+            tmp->next = current_pcb;
+        }
+        //enqueue(current_pcb, ready_queque);
     }
+
+    Procces* best     = NULL;
+    Procces* best_prev = NULL;
+    Procces* tmp      = ready_queque;
+    Procces* prev     = NULL;
+    int max_prio      = -9999;
+
+    while (tmp)
+    {
+        if(tmp->prioryty > max_prio){
+            max_prio = tmp->prioryty;
+            best = tmp;
+            best_prev = prev;
+        }
+        prev = tmp;
+        tmp = tmp->next;
+    }
+
+    if(!best) return;
+
+    if(best == ready_queque){
+        ready_queque = best->next;
+    } else if(prev){
+        prev->next = best->next;
+    }
+
+    current_pcb = best;
+    current_pcb->state = PROC_RUNNING;
+    current_pcb->next = NULL;
+
+    current_pcb->quantum = DEFAULT_QUANTUM + (current_pcb->prioryty * 3);
     
+    /*
     current_pcb = dequeue(ready_queque);
 
     current_pcb->state = PROC_RUNNING;
 
     context_switch(&prev->esp, &current_pcb->esp);
+    */
 }

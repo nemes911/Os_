@@ -1,6 +1,7 @@
 #include "bitmap.h"
 #include "inode.h"
 #include <string.h>
+#include "errno.h"
 
 static inode_t inode_table[MAX_INODES];
 
@@ -12,16 +13,14 @@ void inode_init(){
 }
 
 int inode_alloc(){
-    for(uint32_t i = 0; 0 < MAX_INODES; i++){
+    for(uint32_t i = 0; i < MAX_INODES; i++){   // ← было 0 < MAX_INODES
         if(!inode_test(i)){
             inode_set(i);
-
             inode_table[i].size = 0;
             inode_table[i].first_block = 0;
             inode_table[i].indirect = 0;
             inode_table[i].type = FS_FILE_SEQ;
             inode_table[i].flags = 0;
-
             return i;
         }
     }
@@ -44,6 +43,13 @@ inode_t* inode_get(uint32_t i){
         return NULL;
 
     return &inode_table[i];
+}
+
+void inode_flush(void) {
+    // Записываем всю таблицу inode на диск начиная с INODE_START_LBA
+    for (int i = 0; i < MAX_INODES; i += (BLOCK_SIZE / sizeof(inode_t))) {
+        disk_write_sector(INODE_START_LBA + i, &inode_table[i]);
+    }
 }
 
 void inode_save(){

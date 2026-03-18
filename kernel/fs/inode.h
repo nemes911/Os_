@@ -1,8 +1,10 @@
 #ifndef INODE_H
 #define INODE_H
 
-
+#define BLOCK_SIZE 512
 #include "s5fs.h"
+
+
 
 void inode_init();
 
